@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Represents the stages of a lead in the sales lifecycle funnel.
+enum LeadStatus {
+  NEW
+  QUALIFIED
+  NURTURE
+  OPPORTUNITY
+  CUSTOMER
+  LOST
+}
+
+/// Represents a lead captured in the system with their attributes, enrichment details, and tracking metadata.
+model Lead {
+  /// Unique identifier for each lead, generated using CUID for secure, URL-friendly keys.
+  id                String      @id @default(cuid())
+
+  /// The full name of the contact person.
+  name              String?
+
+  /// The unique email address for the lead. Used as the primary lookup and unique constraint.
+  email             String      @unique
+
+  /// Contact phone number of the lead.
+  phone             String?
+
+  /// The name of the company or organization the lead belongs to.
+  company           String?
+
+  /// The acquisition channel/source of the lead (e.g., "Web Scraper", "Google Ads", "Referral").
+  source            String?
+
+  /// UTM parameters for campaign attribution, stored as JSON (e.g., utm_source, utm_medium, etc.).
+  utmParams         Json?       @default("{}")
+
+  /// Lead score calculated based on demographic criteria, actions, or interaction history.
+  score             Int         @default(0)
+
+  /// Current status/stage of the lead in the conversion funnel.
+  status            LeadStatus  @default(NEW)
+
+  /// Answers or raw responses from questionnaires, surveys, or intake forms stored as JSON.
+  answers           Json?       @default("{}")
+
+  /// Explict opt-in/consent from the lead for communication and data processing.
+  consent           Boolean     @default(false)
+
+  /// The timestamp indicating when the lead was last enriched via external APIs (e.g. Clearbit, Apollo).
+  enrichedAt        DateTime?
+
+  /// The service or provider name used for the data enrichment.
+  enrichmentSource  String?
+
+  /// Record creation timestamp.
+  createdAt         DateTime    @default(now())
+
+  /// Record modification timestamp.
+  updatedAt         DateTime    @updatedAt
+
+  /// Relational links to meetings scheduled for this lead.
+  meetings          Meeting[]
+
+  /// Performance indexes to optimize search and analytical operations.
+  /// Note: A unique B-tree index is automatically created on 'email' by PostgreSQL due to the @unique constraint.
+  @@index([status])
+  @@index([score])
+  @@index([createdAt])
+}
+
+/// Represents a meeting scheduled with a lead.
+model Meeting {
+  id          Int      @id @default(autoincrement())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id])
+  date        DateTime
+  status      String   @default("SCHEDULED")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Represents an email campaign step.
+model Campaign {
+  id          Int      @id @default(autoincrement())
+  step_number Int
+  subject     String
+  body        String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([step_number])
+}

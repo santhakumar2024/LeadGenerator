@@ -29,7 +29,7 @@ export const scrapeWebsite = async (url: string) => {
         await prisma.lead.create({
           data: {
             email,
-            company_name: hostname,
+            company: hostname,
             source: 'web_scraper',
             status: 'NEW'
           }

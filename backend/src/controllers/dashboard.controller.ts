@@ -1,21 +1,25 @@
 import { Request, Response } from 'express';
 import { prisma } from '../prisma';
+import { LeadStatus } from '@prisma/client';
 
-export const getDashboardStats = async (req: Request, res: Response) => {
+export const getDashboardStats = async (req: Request, res: Response): Promise<any> => {
   try {
     const totalLeads = await prisma.lead.count();
-    const newLeads = await prisma.lead.count({ where: { status: 'NEW' } });
-    const repliedLeads = await prisma.lead.count({ where: { status: 'REPLIED' } });
-    const activeLeads = await prisma.lead.count({ where: { status: 'CONTACTED' } });
+    const newLeads = await prisma.lead.count({ where: { status: LeadStatus.NEW } });
+    const opportunityLeads = await prisma.lead.count({ where: { status: LeadStatus.OPPORTUNITY } });
+    const nurtureLeads = await prisma.lead.count({ where: { status: LeadStatus.NURTURE } });
+    const customerLeads = await prisma.lead.count({ where: { status: LeadStatus.CUSTOMER } });
 
-    res.json({
+    return res.json({
       totalLeads,
       newLeads,
-      repliedLeads,
-      activeLeads,
-      replyRate: totalLeads > 0 ? ((repliedLeads / totalLeads) * 100).toFixed(1) : 0
+      repliedLeads: opportunityLeads, // Keep matching frontend expected fields
+      activeLeads: nurtureLeads,
+      customerLeads,
+      replyRate: totalLeads > 0 ? ((opportunityLeads / totalLeads) * 100).toFixed(1) : 0
     });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+  } catch (error: any) {
+    console.error('[DashboardController] Error in getDashboardStats:', error);
+    return res.status(500).json({ error: 'Failed to fetch dashboard stats', message: error.message });
   }
 };

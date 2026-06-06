@@ -27,7 +27,7 @@ const LeadList = () => {
   };
 
   const togglePause = async (lead) => {
-    const newStatus = lead.status === 'PAUSED' ? 'CONTACTED' : 'PAUSED';
+    const newStatus = lead.status === 'LOST' ? 'NURTURE' : 'LOST';
     try {
       await fetch(`${proxyUrl}/leads/${lead.id}/status`, {
         method: 'PATCH',
@@ -90,8 +90,10 @@ const LeadList = () => {
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'NEW': return 'status-badge status-pending';
-      case 'CONTACTED': return 'status-badge status-active';
-      case 'REPLIED': return 'status-badge status-active';
+      case 'NURTURE': return 'status-badge status-active';
+      case 'OPPORTUNITY': return 'status-badge status-active';
+      case 'CUSTOMER': return 'status-badge status-success';
+      case 'LOST': return 'status-badge status-paused';
       default: return 'status-badge';
     }
   };
@@ -172,34 +174,37 @@ const LeadList = () => {
             </tr>
           </thead>
           <tbody>
-            {leads.map((lead) => (
-              <tr key={lead.id}>
-                <td>{lead.email.includes('@placeholder.com') ? <span style={{color: 'var(--text-muted)'}}>No Email</span> : lead.email}</td>
-                <td>{lead.name || 'N/A'}</td>
-                <td>{lead.company_name || 'N/A'}</td>
-                <td>{lead.phone || 'N/A'}</td>
-                <td>
-                  <span className={getStatusBadgeClass(lead.status)}>
-                    {lead.status}
-                  </span>
-                </td>
-                <td>{lead.step_count}</td>
-                <td>
-                  {lead.last_contacted_at ? new Date(lead.last_contacted_at).toLocaleDateString() : 'Never'}
-                </td>
-                <td>
-                  {(lead.status === 'CONTACTED' || lead.status === 'PAUSED' || lead.status === 'NEW') && (
-                    <button 
-                      className={mainStyles['btn-primary']} 
-                      style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', backgroundColor: lead.status === 'PAUSED' ? 'var(--success-green)' : 'var(--text-muted)' }}
-                      onClick={() => togglePause(lead)}
-                    >
-                      {lead.status === 'PAUSED' ? 'Resume' : 'Pause'} Automation
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {leads.map((lead) => {
+              const answers = lead.answers || {};
+              return (
+                <tr key={lead.id}>
+                  <td>{lead.email.includes('@placeholder.com') ? <span style={{color: 'var(--text-muted)'}}>No Email</span> : lead.email}</td>
+                  <td>{lead.name || 'N/A'}</td>
+                  <td>{lead.company || 'N/A'}</td>
+                  <td>{lead.phone || 'N/A'}</td>
+                  <td>
+                    <span className={getStatusBadgeClass(lead.status)}>
+                      {lead.status}
+                    </span>
+                  </td>
+                  <td>{answers.step_count || 0}</td>
+                  <td>
+                    {answers.last_contacted_at ? new Date(answers.last_contacted_at).toLocaleDateString() : 'Never'}
+                  </td>
+                  <td>
+                    {(lead.status === 'NURTURE' || lead.status === 'LOST' || lead.status === 'NEW') && (
+                      <button 
+                        className={mainStyles['btn-primary']} 
+                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', backgroundColor: lead.status === 'LOST' ? '#10b981' : 'var(--text-muted)' }}
+                        onClick={() => togglePause(lead)}
+                      >
+                        {lead.status === 'LOST' ? 'Resume' : 'Pause'} Automation
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
             {leads.length === 0 && (
               <tr>
                 <td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>

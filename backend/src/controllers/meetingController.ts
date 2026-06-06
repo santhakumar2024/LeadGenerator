@@ -12,8 +12,8 @@ export const scheduleMeeting = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'leadId and date are required' });
     }
 
-    const meetingDate = new Date(date);
-    const lead = await prisma.lead.findUnique({ where: { id: parseInt(leadId) } });
+        const meetingDate = new Date(date);
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     
     if (!lead) {
       return res.status(404).json({ error: 'Lead not found' });
@@ -28,10 +28,10 @@ export const scheduleMeeting = async (req: Request, res: Response) => {
       }
     });
 
-    // Move Lead status to MEETING_SCHEDULED
+    // Move Lead status to MEETING_SCHEDULED (using string LeadStatus)
     await prisma.lead.update({
       where: { id: lead.id },
-      data: { status: 'MEETING_SCHEDULED' }
+      data: { status: 'OPPORTUNITY' } // Maps to valid LeadStatus enum stage
     });
 
     // Create ICS Event
@@ -44,13 +44,13 @@ export const scheduleMeeting = async (req: Request, res: Response) => {
         meetingDate.getMinutes()
       ],
       duration: { minutes: 30 },
-      title: `Consultation: ${lead.first_name || 'Client'} & QuentroNova`,
+      title: `Consultation: ${lead.name || 'Client'} & QuentroNova`,
       description: 'Discovery call to discuss software automation and growth.',
       location: 'Google Meet / Zoom (Link to follow)',
       status: 'CONFIRMED',
       organizer: { name: 'QuentroNova Admin', email: 'admin@quentronova.com' },
       attendees: [
-        { name: lead.first_name || 'Prospect', email: lead.email, rsvp: true, partstat: 'ACCEPTED', role: 'REQ-PARTICIPANT' }
+        { name: lead.name || 'Prospect', email: lead.email, rsvp: true, partstat: 'ACCEPTED', role: 'REQ-PARTICIPANT' }
       ]
     };
 
@@ -64,8 +64,8 @@ export const scheduleMeeting = async (req: Request, res: Response) => {
       const mailOptions = {
         from: '"QuentroNova Admin" <admin@quentronova.com>',
         to: [lead.email, 'admin@quentronova.com'].join(','),
-        subject: `Meeting Scheduled: QuentroNova & ${lead.company_name || lead.first_name}`,
-        text: `Hi ${lead.first_name},\n\nYour meeting is confirmed for ${meetingDate.toLocaleString()}.\nPlease find the calendar invite attached.\n\nBest,\nQuentroNova Team`,
+        subject: `Meeting Scheduled: QuentroNova & ${lead.company || lead.name || 'Prospect'}`,
+        text: `Hi ${lead.name || 'there'},\n\nYour meeting is confirmed for ${meetingDate.toLocaleString()}.\nPlease find the calendar invite attached.\n\nBest,\nQuentroNova Team`,
         icalEvent: {
           filename: 'invitation.ics',
           method: 'request',

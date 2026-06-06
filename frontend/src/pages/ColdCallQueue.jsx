@@ -18,8 +18,8 @@ const ColdCallQueue = () => {
     try {
       const res = await fetch(`${proxyUrl}/leads`);
       const data = await res.json();
-      // Only keep leads that need reaching out (NEW, FOLLOW_UP_CALL)
-      const callQueue = data.filter(l => l.status === 'NEW' || l.status === 'FOLLOW_UP_CALL');
+      // Only keep leads that need reaching out (NEW, NURTURE)
+      const callQueue = data.filter(l => l.status === 'NEW' || l.status === 'NURTURE');
       setLeads(callQueue);
     } catch (err) {
       console.error(err);
@@ -80,19 +80,19 @@ const ColdCallQueue = () => {
       {currentLead ? (
         <div className="table-card" style={{ padding: '2.5rem', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
           <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--text-dark)' }}>
-            {currentLead.first_name || 'No Name'} {currentLead.last_name || ''}
+            {currentLead.name || 'No Name'}
           </h1>
           <h3 style={{ fontSize: '1.2rem', color: 'var(--text-muted)', fontWeight: 'normal', marginBottom: '0.2rem' }}>
-            {currentLead.job_title || 'Unknown Title'}
+            {currentLead.answers?.jobTitle || 'Unknown Title'}
           </h3>
           <h4 style={{ fontSize: '1.1rem', color: 'var(--primary-blue)', marginBottom: '2rem' }}>
-            @ {currentLead.company_name || 'Unknown Company'}
+            @ {currentLead.company || 'Unknown Company'}
           </h4>
 
           <div style={{ padding: '1.5rem', background: '#ebf2ff', borderRadius: 'var(--radius)', marginBottom: '2rem', textAlign: 'left', borderLeft: '4px solid var(--primary-blue)' }}>
             <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--primary-blue)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Opening Line:</strong>
             <p style={{ fontSize: '1.1rem', color: 'var(--text-dark)' }}>
-              "{getSalesScript(currentLead.company_type)}"
+              "{getSalesScript(currentLead.answers?.company_type)}"
             </p>
           </div>
 
@@ -105,7 +105,7 @@ const ColdCallQueue = () => {
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <button 
-              onClick={() => updateLeadAndNext(currentLead.id, 'FOLLOW_UP_CALL')}
+              onClick={() => updateLeadAndNext(currentLead.id, 'NURTURE')}
               style={{ padding: '0.6rem 1.2rem', background: 'var(--bg-gray)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', cursor: 'pointer', color: 'var(--text-dark)' }}
             >
               No Answer
@@ -114,7 +114,7 @@ const ColdCallQueue = () => {
               onClick={() => {
                 const fourHoursLater = new Date();
                 fourHoursLater.setHours(fourHoursLater.getHours() + 4);
-                updateLeadAndNext(currentLead.id, 'FOLLOW_UP_CALL', fourHoursLater);
+                updateLeadAndNext(currentLead.id, 'NURTURE', fourHoursLater);
               }}
               style={{ padding: '0.6rem 1.2rem', background: 'var(--bg-gray)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', cursor: 'pointer', color: 'var(--text-dark)' }}
             >

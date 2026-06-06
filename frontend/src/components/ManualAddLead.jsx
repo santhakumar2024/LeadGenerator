@@ -99,7 +99,7 @@ const ManualAddLead = ({ onLeadAdded }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          first_name: firstName,
+          name: firstName,
           company_name: companyName,
           ai_icebreaker: icebreaker
         })

@@ -108,35 +108,38 @@ const WebScraping = () => {
                                         No results yet. Start a scraping session to find leads.
                                     </td>
                                 </tr>
-                            ) : results.map(lead => (
-                                <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)', fontSize: '0.9rem' }}>
-                                    <td style={{ padding: '1rem' }}>
-                                        <div style={{ fontWeight: 'bold', color: 'var(--text-dark)' }}>{lead.company_name}</div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lead.website || 'No website'}</div>
-                                    </td>
-                                    <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{lead.owner || 'N/A'}</td>
-                                    <td style={{ padding: '1rem' }}>
-                                        <div>{lead.email}</div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{lead.phone}</div>
-                                    </td>
-                                    <td style={{ padding: '1rem' }}>
-                                        <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', backgroundColor: 'var(--bg-gray)', color: 'var(--text-dark)' }}>
-                                            {lead.company_type || 'General'}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '1rem' }}>
-                                        {lead.security_note ? (
-                                            <div style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-                                                <ShieldAlert size={14} /> Insecure
-                                            </div>
-                                        ) : (
-                                            <div style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-                                                <CheckCircle2 size={14} /> Secure
-                                            </div>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
+                            ) : results.map(lead => {
+                                const answers = lead.answers || {};
+                                return (
+                                    <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)', fontSize: '0.9rem' }}>
+                                        <td style={{ padding: '1rem' }}>
+                                            <div style={{ fontWeight: 'bold', color: 'var(--text-dark)' }}>{lead.company || 'Unknown'}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{answers.website || 'No website'}</div>
+                                        </td>
+                                        <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{answers.owner || 'N/A'}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <div>{lead.email}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{lead.phone}</div>
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', backgroundColor: 'var(--bg-gray)', color: 'var(--text-dark)' }}>
+                                                {answers.company_type || 'General'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
+                                            {answers.security_note ? (
+                                                <div style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+                                                    <ShieldAlert size={14} /> Insecure
+                                                </div>
+                                            ) : (
+                                                <div style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+                                                    <CheckCircle2 size={14} /> Secure
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

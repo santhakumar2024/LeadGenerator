@@ -71,7 +71,9 @@ const processUnseenEmails = (imap: Imap) => {
                     email,
                     name,
                     status: 'NEW',
-                    initial_message_id: parsed.messageId
+                    answers: {
+                      initial_message_id: parsed.messageId
+                    }
                   }
                 });
                 console.log(`Saved new lead: ${email}`);

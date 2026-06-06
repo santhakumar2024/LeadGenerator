@@ -2,6 +2,7 @@ import { Outlet, NavLink } from 'react-router-dom';
 import sidebarStyles from '../Sidebar.module.css';
 import mainStyles from '../MainContent.module.css';
 import { LayoutDashboard, Users, Mail, PhoneCall, Target } from 'lucide-react';
+import ExitIntentPopup from './ExitIntentPopup';
 
 const Layout = () => {
   return (
@@ -14,6 +15,13 @@ const Layout = () => {
         >
           <LayoutDashboard size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
           Dashboard
+        </NavLink>
+        <NavLink 
+          to="/dashboard" 
+          className={({ isActive }) => `${sidebarStyles['nav-link']} ${isActive ? sidebarStyles.active : ''}`}
+        >
+          <LayoutDashboard size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+          Admin Directory
         </NavLink>
         <NavLink 
           to="/leads" 
@@ -48,6 +56,7 @@ const Layout = () => {
       <main className={mainStyles.main}>
         <Outlet context={{ mainStyles }} />
       </main>
+      <ExitIntentPopup />
     </div>
   );
 };

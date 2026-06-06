@@ -122,29 +122,25 @@ export const scrapeGoogleMaps = async (searchQuery: string) => {
         
         const email = validEmails.length > 0 ? validEmails[0].toLowerCase() : `no-email-${Date.now()}@placeholder.com`;
 
-        // Check for duplicates (Company Name + Email)
-        const existing = await prisma.lead.findFirst({
-            where: {
-                AND: [
-                    { company_name },
-                    { email }
-                ]
-            }
+        // Check for duplicate lead by email (which is unique)
+        const existing = await prisma.lead.findUnique({
+            where: { email }
         });
 
         if (!existing) {
             const newLead = await prisma.lead.create({
               data: {
                 email,
-                company_name,
-                company_type,
-                phone: phone || undefined,
-                website: website || undefined,
-                security_note: security_note || undefined,
+                company: company_name || null,
+                phone: phone || null,
                 source: 'gmaps_scraper',
                 status: 'NEW',
-                // Owner is usually not direct on Gmaps, could be added via AI later
-                owner: 'Search Pending' 
+                answers: {
+                  company_type,
+                  website,
+                  security_note,
+                  owner: 'Search Pending'
+                }
               }
             });
             addedCount++;

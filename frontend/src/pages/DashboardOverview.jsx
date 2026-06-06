@@ -33,14 +33,14 @@ const DashboardOverview = () => {
 
   // 1. The Big Numbers
   const totalLeads = leads.length;
-  const activeDrips = leads.filter(l => l.status === 'NEW' || l.status === 'CONTACTED').length;
-  const meetingsSet = leads.filter(l => l.status === 'MEETING_SCHEDULED').length;
-  const insecureSites = leads.filter(l => l.security_note).length;
+  const activeDrips = leads.filter(l => l.status === 'NEW' || l.status === 'NURTURE').length;
+  const meetingsSet = leads.filter(l => l.status === 'OPPORTUNITY').length;
+  const insecureSites = leads.filter(l => l.answers?.security_note).length;
 
   // 2. Funnel Stages
   const emailed = leads.filter(l => l.status !== 'NEW').length;
-  const called = meetingsSet + leads.filter(l => ['FOLLOW_UP_CALL', 'QUALIFIED', 'CLIENT_COMPLETED'].includes(l.status)).length;
-  const closed = leads.filter(l => l.status === 'CLIENT_COMPLETED').length;
+  const called = meetingsSet + leads.filter(l => ['NURTURE', 'QUALIFIED', 'CUSTOMER'].includes(l.status)).length;
+  const closed = leads.filter(l => l.status === 'CUSTOMER').length;
 
   // Calculate percentages relative to the total top of funnel for the visual UI
   const getWidth = (count) => totalLeads === 0 ? 0 : Math.max(5, (count / totalLeads) * 100);
@@ -115,7 +115,7 @@ const DashboardOverview = () => {
               {recentActivity.map(lead => (
                 <div key={lead.id} style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-dark)', fontWeight: 'bold' }}>
-                    {lead.first_name || 'Prospect'} {lead.last_name || ''} 
+                    {lead.name || 'Prospect'} 
                     <span style={{ fontWeight: 'normal' }}> moved to </span> 
                     <span style={{ color: 'var(--primary-blue)' }}>{lead.status}</span>
                   </p>
